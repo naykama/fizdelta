@@ -1,0 +1,3 @@
+begin
+writeln('ok');
+end.
