@@ -1,2 +1,2 @@
-Test\fdtest.exe Test\test_case.txt
+Test\fdtest.exe Test\autotest.cfg
 @pause
