@@ -1,2 +1,3 @@
-Test\fdtest.exe Test\autotest.cfg
+@rem Test\fdtest.exe 
+fdtest.exe 
 @pause
