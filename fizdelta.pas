@@ -46,10 +46,11 @@ begin
 end;
 
 // Разбирает строку с переменной
-procedure parseVarLine( s: string);
+procedure parseVarLine( s: string;nLine:integer);
 var
   v: VarT;
   i:integer;
+  
 begin
   var p:=pos('=',s,1);
   v.name:=copy(s,1,p-1);
@@ -60,7 +61,10 @@ begin
   v.valueCount:=w.Length-1;
   for i:=2 to w.Length-1 do
     v.valueList[i]:=w[i].ToReal;
-  varDict.Add( v.name, v);
+  if varDict.ContainsKey(v.name) then  
+    exitError('Duplicate variable name "'+v.name+'" in string '+nLine)
+  else
+    varDict.Add( v.name, v);
   if resultCount<v.valueCount then
     resultCount:=v.valueCount;
   debug('v.name: '+v.name+', delta:'+v.delta+' ;'); 
@@ -71,14 +75,16 @@ procedure inputData();
 var
   input:text;
   s:string;
+  nLine:integer:=0;
 begin
   assign(input,'input.txt');
   reset(input);
   while not eof(input) do
     begin
+    nLine+=1;
     readln(input,s);
     if pos('=',s,1)<>0 then
-      parseVarLine(s)
+      parseVarLine(s,nLine)
     else
       formula:=s;
     end;
