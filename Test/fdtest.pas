@@ -35,14 +35,22 @@ begin
   p.StartInfo.FileName := runPath;
   p.StartInfo.Arguments := '';
   p.StartInfo.WindowStyle := ProcessWindowStyle.Hidden;
-  // нужно для перенаправления потоков
+  // РЅСѓР¶РЅРѕ РґР»СЏ РїРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕС‚РѕРєРѕРІ
   p.StartInfo.UseShellExecute := false;
+  p.StartInfo.RedirectStandardError:=true;
   p.StartInfo.RedirectStandardOutput := true;
   p.Start();
   p.WaitForExit();
   exitCode := p.ExitCode;
   debug('exitCode: ' + exitCode);
   nOutStr := 0;
+  var erout := p.StandardError;
+  while erout.Peek() >= 0 do
+    begin
+    nOutStr += 1;
+    outStr[nOutStr] := erout.ReadLine();
+    debug('sout: ' + nOutStr + ': [' + outStr[nOutStr] + ']');
+    end;
   var sout := p.StandardOutput;
   while sout.Peek() >= 0 do
     begin
@@ -56,14 +64,14 @@ end;
 procedure processConfig();
 var
 
-  // '-' - нет тестового случая
-  // 'I' - ожидаем строки ввода
-  // 'R' - ожидаем строки результата
+  // '-' - РЅРµС‚ С‚РµСЃС‚РѕРІРѕРіРѕ СЃР»СѓС‡Р°СЏ
+  // 'I' - РѕР¶РёРґР°РµРј СЃС‚СЂРѕРєРё РІРІРѕРґР°
+  // 'R' - РѕР¶РёРґР°РµРј СЃС‚СЂРѕРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
   state:char:='-';
   
-  // метка текущей строки
-  // возможные значения: "CASE", "OK", "ERROR"
-  // "" если в текущей строке нет метки
+  // РјРµС‚РєР° С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё
+  // РІРѕР·РјРѕР¶РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ: "CASE", "OK", "ERROR"
+  // "" РµСЃР»Рё РІ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРµ РЅРµС‚ РјРµС‚РєРё
   mark:string;
   caseName:string;
   caseLine:integer;
