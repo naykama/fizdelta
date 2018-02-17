@@ -133,9 +133,9 @@ var
       begin
       writeln('Unexpected result:');
       if exitCode=0 then
-        writeln('ERROR instead of SUCCESS')
-      else
         writeln('SUCCESS instead of ERROR ')
+      else
+        writeln('ERROR instead of SUCCESS')
       end;
     if isTextDiff then
       begin
