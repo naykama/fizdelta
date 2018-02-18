@@ -50,17 +50,30 @@ procedure parseVarLine( s: string;nLine:integer);
 var
   v: VarT;
   i:integer;
+
+function toReal(s:string):real;
+var
+  i:integer;
+begin
+  for i:=1 to length(s) do
+    if s[i]=',' then
+      begin
+      delete(s,i,1);
+      insert('.',s,i);
+      end;
+  toReal:=s.ToReal;
+end;
   
 begin
   var p:=pos('=',s,1);
   v.name:=copy(s,1,p-1);
   delete(s,1,p);
   var w:=s.ToWords;
-  v.delta:=w[1].ToReal;
-  v.valueList[1]:=w[0].ToReal;
+  v.delta:=toReal(w[1]);
+  v.valueList[1]:=toReal(w[0]);
   v.valueCount:=w.Length-1;
   for i:=2 to w.Length-1 do
-    v.valueList[i]:=w[i].ToReal;
+    v.valueList[i]:=toReal(w[i]);
   if varDict.ContainsKey(v.name) then  
     exitError('Duplicate variable name "'+v.name+'" in string '+nLine)
   else
@@ -120,7 +133,14 @@ begin
 end;
 
 begin
-  inputData();
-  calculate();
-  outputResult();
+  try
+    inputData();
+    calculate();
+    outputResult();
+  except on e: Exception do
+    begin
+      System.Console.Error.WriteLine( e.ToString());
+      halt(13);
+    end;
+  end;
 end.
