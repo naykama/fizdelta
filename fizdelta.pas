@@ -45,12 +45,6 @@ begin
     writeln(msg);
 end;
 
-// Разбирает строку с переменной
-procedure parseVarLine( s: string;nLine:integer);
-var
-  v: VarT;
-  i:integer;
-
 function toReal(s:string):real;
 var
   i:integer;
@@ -63,7 +57,12 @@ begin
       end;
   toReal:=s.ToReal;
 end;
-  
+
+// Разбирает строку с переменной
+procedure parseVarLine( var resultCountName:string;s: string;nLine:integer);
+var
+  v: VarT;
+  i:integer;
 begin
   var p:=pos('=',s,1);
   v.name:=copy(s,1,p-1);
@@ -78,8 +77,13 @@ begin
     exitError('Duplicate variable name "'+v.name+'" in string '+nLine)
   else
     varDict.Add( v.name, v);
-  if resultCount<v.valueCount then
+  if (v.valueCount>1)and(resultCount>1)and(resultCount<>v.valueCount) then
+    exitError('Inconsistent number of variable values (variables "'+v.name+'" and "'+resultCountName+'")')
+  else if resultCount<v.valueCount then
+    begin
     resultCount:=v.valueCount;
+    resultCountName:=v.name;
+    end;
   debug('v.name: '+v.name+', delta:'+v.delta+' ;'); 
 end;
 
@@ -89,6 +93,7 @@ var
   input:text;
   s:string;
   nLine:integer:=0;
+  resultCountName:string;
 begin
   assign(input,'input.txt');
   reset(input);
@@ -97,7 +102,7 @@ begin
     nLine+=1;
     readln(input,s);
     if pos('=',s,1)<>0 then
-      parseVarLine(s,nLine)
+      parseVarLine(resultCountName,s,nLine)
     else
       formula:=s;
     end;
