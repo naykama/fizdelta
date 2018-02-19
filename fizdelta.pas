@@ -87,11 +87,16 @@ begin
   v.name:=copy(s,1,p-1);
   delete(s,1,p);
   var w:=s.ToWords;
-  v.delta:=toReal(w[1]);
-  v.valueList[1]:=toReal(w[0]);
-  v.valueCount:=w.Length-1;
-  for i:=2 to w.Length-1 do
-    v.valueList[i]:=toReal(w[i]);
+  try
+    v.delta:=toReal(w[1]);
+    v.valueList[1]:=toReal(w[0]);
+    v.valueCount:=w.Length-1;
+    for i:=2 to w.Length-1 do
+      v.valueList[i]:=toReal(w[i]);
+  except
+    on System.FormatException do
+      exitError('Incorrect value of variable "'+v.name+'"');
+  end;
   if varDict.ContainsKey(v.name) then  
     exitError('Duplicate variable name "'+v.name+'" in string '+nLine)
   else
