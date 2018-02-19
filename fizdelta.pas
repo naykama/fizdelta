@@ -31,6 +31,9 @@ var
   isDebug:boolean:=
 //    true;
     false;
+
+  // Точность    
+  precision:integer:=0;
     
 // Выход с сообщением об ошибке
 procedure exitError(errorText:string);
@@ -45,6 +48,7 @@ begin
     writeln(msg);
 end;
 
+// Перевод строки в число
 function toReal(s:string):real;
 var
   i:integer;
@@ -58,11 +62,26 @@ begin
   toReal:=s.ToReal;
 end;
 
+// Точность результата
+function getPrecision(s:string):integer;
+var
+  i:integer;
+begin
+    for i:=1 to length(s) do
+      if s[i]=',' then
+        begin
+        delete(s,i,1);
+        insert('.',s,i);
+        end;
+  getPrecision:=length(s)-pos('.',s);
+end;
+
 // Разбирает строку с переменной
 procedure parseVarLine( var resultCountName:string;s: string;nLine:integer);
 var
   v: VarT;
   i:integer;
+  maxPr:integer;
 begin
   var p:=pos('=',s,1);
   v.name:=copy(s,1,p-1);
@@ -84,6 +103,11 @@ begin
     resultCount:=v.valueCount;
     resultCountName:=v.name;
     end;
+  for i:=0 to w.Length-1 do
+    if maxPr<getPrecision(w[i])then
+      maxPr:=getPrecision(w[i]);
+  if precision<maxPr then
+    precision:=maxPr;
   debug('v.name: '+v.name+', delta:'+v.delta+' ;'); 
 end;
 
@@ -115,7 +139,7 @@ end;
 procedure outputResult();
 begin
   for var i:=1 to resultCount do
-    writeln(resultList[i].resValue,'+-',resultList[i].resDelta);
+    writeln(resultList[i].resValue:0:precision,'+-',resultList[i].resDelta:0:precision);
 end;
 
 // Возвращает результат i-того вычисления формулы
