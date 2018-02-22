@@ -1,5 +1,12 @@
 ﻿uses System.Collections.Generic;
 
+const
+
+  /// Признак вывода отладочных сообщений  
+  isDebug:boolean =
+  //  true;
+    false;
+
 type
 
   // Переменная (тип)
@@ -16,6 +23,33 @@ type
     resDelta:real;
   end;
   
+  /// Тип элемента формулы (тип)
+  FormulaItemTypeT = ( 
+    // число
+    Num_FIT
+    // операция
+    , Op_FIT
+    // переменная
+    , Var_FIT
+    // функция
+    , Func_FIT
+  );
+  
+  /// Элемент формулы
+  FormulaItemT = record
+    itemType: FormulaItemTypeT;
+    name: string;
+    value: real;
+  end;
+  
+  /// Список элементов формулы
+  FormulaItemsT = List<FormulaItemT>;
+
+const
+
+  /// Символы операций, используемых в формулах
+  Operator_Chars: string = '+-*/^()';
+ 
 var
 
   // Словарь переменных
@@ -27,10 +61,6 @@ var
   // Массив и число результатов
   resultList:array [1..100] of ResultT;
   resultCount:integer:=0;
-  
-  isDebug:boolean:=
-//    true;
-    false;
 
   // Точность    
   precision:integer:=0;
@@ -45,7 +75,7 @@ end;
 procedure debug( msg: string);
 begin
   if isDebug then
-    writeln(msg);
+    writeln('DBG: ' + msg);
 end;
 
 // Перевод строки в число
@@ -147,23 +177,186 @@ begin
     writeln(resultList[i].resValue:0:precision,'+-',resultList[i].resDelta:0:precision);
 end;
 
-// Возвращает результат i-того вычисления формулы
-procedure calculateFormula(var resValue:real; var resDelta:real; iResult:integer);
+// Добавляет новый элемент при разборе строки с формулой
+procedure addFormulaItem( fi: FormulaItemsT; itemStr: string; itemType: FormulaItemTypeT; startPos: integer);
+var
+  item: FormulaItemT;
 begin
-  if varDict.ContainsKey(formula) then
+  item.itemType:=itemType;
+  if itemType = Num_FIT then
+    item.value:=itemStr.ToReal
+  else 
+    item.name:=itemStr;
+  fi.Add(item);
+end;
+
+// Возвращает элементы формулы (в порядке вхождения в формулу)
+function parseFormula(s: string): FormulaItemsT;
+var
+
+  // Элементы формулы
+  fi := new FormulaItemsT;
+  
+  // Позиция первого символа элемента (0 если нет элемента)
+  iFirst: integer := 0;
+  
+  // Позиция последнего символа элемента (0 если последний
+  // символ не определен)
+  iLast: integer := 0;
+  
+  // Тип текущего элемента формулы
+  itemType: FormulaItemTypeT;
+
+begin
+  debug( 'formula: "' + s + '"');
+  
+  // Последняя итерация цикла выполняется "за концом строки"
+  for var i:=1 to s.Length + 1 do
     begin
-    resValue:=varDict[formula].valueList[
-      min(iResult,varDict[formula].valueCount)
-    ];
-    resDelta:=varDict[formula].delta;
+    var isCh := i <= s.Length;
+    var ch := isCh ? s[i] : '0';
+    if char.IsWhiteSpace(ch) then
+      begin
+      if (iFirst > 0) and (iLast=0) then
+        iLast := i - 1;
+      end
+    else
+      begin
+      var isOperator := pos(ch, Operator_Chars) > 0;
+      if (iFirst > 0) and ((iLast > 0) or not isCh or isOperator) then
+        begin
+        // добавление текущего элемента
+        if iLast = 0 then iLast := i - 1;
+        if (itemType = Var_FIT) and ( ch = '(') then
+          itemType := Func_FIT;
+        addFormulaItem( fi, copy(s, iFirst, iLast-iFirst+1), itemType, iFirst);
+        iFirst := 0;
+        end;
+      if isCh and (iFirst = 0) then
+        begin
+        // начинаем новый элемент 
+        iFirst := i;
+        if isOperator then
+          begin
+          itemType := Op_FIT;
+          iLast := i;
+          end
+        else
+          begin
+          itemType := char.IsDigit(ch) ? Num_FIT : Var_FIT;
+          iLast := 0;
+          end;
+        end;
+      end;
     end;
+  parseFormula := fi;
+  if isDebug then
+    writeln('DBG: parseFormula: result: ', fi);
+end;
+
+/// Возвращает приоритет оператора 
+function getPriority(op:string):integer;
+begin
+  case op of
+    string('('), string(')'): getPriority:=0;
+    string('+'), string('-'): getPriority:=1;
+    string('*'), string('/'): getPriority:=2;
+    string('^'): getPriority:=3;
+    else getPriority:=4;
+  end;
+end;
+
+// Возвращает элементы формулы в обратной польской нотации
+function toRpn( inItems: FormulaItemsT): FormulaItemsT;
+var
+  outItems := new FormulaItemsT;
+  st := new Stack<FormulaItemT>;
+  ist:FormulaItemT;
+begin
+  foreach var item in inItems do
+    begin
+    if item.itemType in [Num_FIT, Var_FIT] then
+      outItems+=item
+    else if item.itemType = Func_FIT then
+      st.Push(item)
+    else if item.name='(' then
+       st.Push(item)
+    else if item.name=')' then
+      begin
+      while (st.Count>0) and (st.Peek().name <>'(') do
+        outItems+=st.Pop();
+      st.Pop();
+      end
+    else if item.itemType = Op_FIT then
+      begin
+      while (st.Count>0) and (getPriority(item.name)<=getPriority(st.Peek().name)) do
+        outItems+=st.Pop();
+      st.Push(item);
+      end;
+    end;
+  while st.Count > 0 do
+    outItems+=st.Pop();
+  toRpn := outItems;
+  if isDebug then
+    writeln('DBG: toPrn: result: ', outItems);
+end;
+
+// Возвращает результат i-того вычисления формулы
+procedure calculateFormula(
+  var resValue:real;
+  var resDelta:real;
+  rpnFi: FormulaItemsT;
+  iResult:integer
+);
+var
+  st := new Stack<real>;
+begin
+  foreach var item in rpnFi do
+    begin
+    if isDebug then
+      writeln('DBG: calculateFormula: item:',item);
+    if item.itemType = Num_FIT then
+      st.Push(item.value)
+    else if item.itemType = Var_FIT then
+      st.Push(
+        varDict[item.name].valueList[
+          min(iResult,varDict[item.name].valueCount)
+        ] 
+      )
+    else if item.itemType = Op_FIT then
+      begin
+      var b:=st.Pop();
+      var a:=st.Pop();
+      case item.name of
+        string('+'): st.Push(a+b);
+        string('-'): st.Push(a-b);
+        string('*'): st.Push(a*b);
+        string('/'): st.Push(a/b);
+        string('^'): st.Push(power(a,b));
+      else exitError('unknown operator'+item.name);
+      end;
+      end
+    else exitError('unknown itemType for: '+item.name);
+    if isDebug then
+      writeln('DBG: calculateFormula: st:',st);
+    end;
+  resValue:=st.Pop();
+  
+  if varDict.ContainsKey(formula) then
+    resDelta:=varDict[formula].delta;    
 end;
 
 // Вычисляет результат
 procedure calculate();
+var
+
+  // Элементы формулы в обратной польской нотации  
+  rpnFi: FormulaItemsT;
+
 begin
+  rpnFi := toRpn( parseFormula( formula));
   for var i:=1 to resultCount do
-    calculateFormula(resultList[i].resValue,resultList[i].resDelta,i);
+    calculateFormula(resultList[i].resValue,resultList[i].resDelta,rpnFi,i);
 end;
 
 begin
