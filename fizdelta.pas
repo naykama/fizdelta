@@ -266,6 +266,12 @@ begin
   end;
 end;
 
+/// Возвращает истину если оператор левоассоциативный
+function isLeftAssociativity(op:string):boolean;
+begin
+  isLeftAssociativity := op <> string('^');
+end;
+
 // Возвращает элементы формулы в обратной польской нотации
 function toRpn( inItems: FormulaItemsT): FormulaItemsT;
 var
@@ -289,7 +295,12 @@ begin
       end
     else if item.itemType = Op_FIT then
       begin
-      while (st.Count>0) and (getPriority(item.name)<=getPriority(st.Peek().name)) do
+      while (st.Count>0) and (
+            isLeftAssociativity(item.name)
+              and (getPriority(item.name)<=getPriority(st.Peek().name))
+            or not isLeftAssociativity(item.name)
+              and (getPriority(item.name)<getPriority(st.Peek().name))
+          ) do
         outItems+=st.Pop();
       st.Push(item);
       end;
