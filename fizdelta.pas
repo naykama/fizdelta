@@ -4,8 +4,6 @@ const
 
   /// Признак вывода отладочных сообщений  
   isDebug:boolean =
-  //  true;
-    false;
 
 type
 
@@ -55,6 +53,9 @@ var
   // Словарь переменных
   varDict := new Dictionary<string,VarT>;
   
+  // Функции для использования в формуле
+  funcDict := new Dictionary< string, real->real >;
+  
   // Формула
   formula:string;
   
@@ -76,6 +77,13 @@ procedure debug( msg: string);
 begin
   if isDebug then
     writeln('DBG: ' + msg);
+end;
+
+/// Инициализация глобальных переменных
+procedure initialize();
+begin
+  // Функции для использования в формуле
+  funcDict[ 'sqrt'] := sqrt;
 end;
 
 // Перевод строки в число
@@ -347,6 +355,8 @@ begin
       else exitError('unknown operator'+item.name);
       end;
       end
+    else if item.itemType = Func_FIT then
+      st.Push(funcDict[item.name](st.Pop()))
     else exitError('unknown itemType for: '+item.name);
     if isDebug then
       writeln('DBG: calculateFormula: st:',st);
@@ -372,6 +382,7 @@ end;
 
 begin
   try
+    initialize();
     inputData();
     calculate();
     outputResult();
