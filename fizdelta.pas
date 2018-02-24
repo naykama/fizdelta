@@ -4,6 +4,8 @@ const
 
   /// Признак вывода отладочных сообщений  
   isDebug:boolean =
+  // true;
+   false;
 
 type
 
@@ -195,6 +197,8 @@ begin
     item.value:=itemStr.ToReal
   else 
     item.name:=itemStr;
+  if (itemType = Var_FIT) and (not varDict.ContainsKey(item.name)) then
+    exitError('Variable "'+item.name+'" not specified');
   fi.Add(item);
 end;
 
