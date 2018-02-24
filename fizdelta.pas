@@ -197,8 +197,10 @@ begin
     item.value:=itemStr.ToReal
   else 
     item.name:=itemStr;
+  if (itemType = Func_FIT) and (not funcDict.ContainsKey(item.name)) then
+    exitError('Unknown function: ' + item.name);
   if (itemType = Var_FIT) and (not varDict.ContainsKey(item.name)) then
-    exitError('Variable "'+item.name+'" not specified');
+    exitError('Variable "' + item.name + '" not specified');
   fi.Add(item);
 end;
 
