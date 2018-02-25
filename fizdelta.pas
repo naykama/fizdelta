@@ -220,6 +220,9 @@ var
   
   // Тип текущего элемента формулы
   itemType: FormulaItemTypeT;
+  
+  // Текущий уровень вложенности скобок
+  prnLevel:integer:=0;
 
 begin
   debug( 'formula: "' + s + '"');
@@ -254,6 +257,10 @@ begin
           begin
           itemType := Op_FIT;
           iLast := i;
+          if ch = '(' then
+            prnLevel+=1
+          else if ch = ')' then
+            prnLevel-=1;
           end
         else
           begin
@@ -262,6 +269,8 @@ begin
           end;
         end;
       end;
+    if (prnLevel<0) or (not isCh and (prnLevel<>0)) then
+      exitError('Number of opening parenthesis is not equal to number of closing parenthesis');
     end;
   parseFormula := fi;
   if isDebug then
