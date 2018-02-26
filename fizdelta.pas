@@ -5,7 +5,7 @@ const
   /// Признак вывода отладочных сообщений  
   isDebug:boolean =
   // true;
-   false;
+ false;
 
 type
 
@@ -197,10 +197,22 @@ begin
     item.value:=itemStr.ToReal
   else 
     item.name:=itemStr;
+  if (itemType = Op_FIT) and (item.name in [string('+'),string('-')])
+      and (
+        (fi.Count=0)
+        or (fi.Last.itemType = Op_FIT) and (fi.Last.name <> ')')
+      )
+      then
+    begin
+    item.name+='U';
+    end;
+  // проверка корректности
   if (itemType = Func_FIT) and (not funcDict.ContainsKey(item.name)) then
     exitError('Unknown function: ' + item.name);
   if (itemType = Var_FIT) and (not varDict.ContainsKey(item.name)) then
     exitError('Variable "' + item.name + '" not specified');
+    
+  // добавление элемента
   fi.Add(item);
 end;
 
@@ -285,14 +297,15 @@ begin
     string('+'), string('-'): getPriority:=1;
     string('*'), string('/'): getPriority:=2;
     string('^'): getPriority:=3;
-    else getPriority:=4;
+    '+U','-U': getPriority:=4;
+    else getPriority:=5;
   end;
 end;
 
 /// Возвращает истину если оператор левоассоциативный
 function isLeftAssociativity(op:string):boolean;
 begin
-  isLeftAssociativity := op <> string('^');
+  isLeftAssociativity := not (op in ['+U','-U',string('^')]);
 end;
 
 // Возвращает элементы формулы в обратной польской нотации
@@ -359,7 +372,9 @@ begin
       )
     else if item.itemType = Op_FIT then
       begin
-      var b:=st.Pop();
+      var b:real;
+      if not(item.name in ['+U','-U']) then 
+        b:=st.Pop();
       var a:=st.Pop();
       case item.name of
         string('+'): st.Push(a+b);
@@ -367,6 +382,8 @@ begin
         string('*'): st.Push(a*b);
         string('/'): st.Push(a/b);
         string('^'): st.Push(power(a,b));
+        '+U': st.Push(+a);
+        '-U': st.Push(-a);
       else exitError('unknown operator'+item.name);
       end;
       end
