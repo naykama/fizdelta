@@ -4,7 +4,7 @@ const
 
   /// Признак вывода отладочных сообщений  
   isDebug:boolean =
-  // true;
+  //true;
  false;
 
 type
@@ -19,8 +19,14 @@ type
   
   // Результат (тип)
   ResultT = record
-    resValue:real;
-    resDelta:real;
+    value:real;
+    delta:real;
+    
+    constructor Create(value: real; delta: real);
+    begin
+      Self.value := value;
+      Self.delta := delta;
+    end;
   end;
   
   /// Тип элемента формулы (тип)
@@ -38,7 +44,9 @@ type
   /// Элемент формулы
   FormulaItemT = record
     itemType: FormulaItemTypeT;
-    name: string;
+    // для функции и переменных
+    name: string; 
+    // для чисел
     value: real;
   end;
   
@@ -54,9 +62,6 @@ var
 
   // Словарь переменных
   varDict := new Dictionary<string,VarT>;
-  
-  // Функции для использования в формуле
-  funcDict := new Dictionary< string, real->real >;
   
   // Формула
   formula:string;
@@ -79,13 +84,6 @@ procedure debug( msg: string);
 begin
   if isDebug then
     writeln('DBG: ' + msg);
-end;
-
-/// Инициализация глобальных переменных
-procedure initialize();
-begin
-  // Функции для использования в формуле
-  funcDict[ 'sqrt'] := sqrt;
 end;
 
 // Перевод строки в число
@@ -184,7 +182,7 @@ end;
 procedure outputResult();
 begin
   for var i:=1 to resultCount do
-    writeln(resultList[i].resValue:0:precision,'+-',resultList[i].resDelta:0:precision);
+    writeln(resultList[i].value:0:precision,'+-',resultList[i].delta:0:precision);
 end;
 
 // Добавляет новый элемент при разборе строки с формулой
@@ -207,7 +205,7 @@ begin
     item.name+='U';
     end;
   // проверка корректности
-  if (itemType = Func_FIT) and (not funcDict.ContainsKey(item.name)) then
+  if (itemType = Func_FIT) and (item.name<>'sqrt') then
     exitError('Unknown function: ' + item.name);
   if (itemType = Var_FIT) and (not varDict.ContainsKey(item.name)) then
     exitError('Variable "' + item.name + '" not specified');
@@ -350,53 +348,83 @@ end;
 
 // Возвращает результат i-того вычисления формулы
 procedure calculateFormula(
-  var resValue:real;
-  var resDelta:real;
+  var res:ResultT;
   rpnFi: FormulaItemsT;
   iResult:integer
 );
 var
-  st := new Stack<real>;
+  st := new Stack<ResultT>;
 begin
   foreach var item in rpnFi do
     begin
     if isDebug then
       writeln('DBG: calculateFormula: item:',item);
     if item.itemType = Num_FIT then
-      st.Push(item.value)
+//     st.Push(item.value)
+      st.Push(new ResultT(item.value,0))
     else if item.itemType = Var_FIT then
       st.Push(
-        varDict[item.name].valueList[
-          min(iResult,varDict[item.name].valueCount)
-        ] 
+        new ResultT(
+          varDict[item.name].valueList[
+            min(iResult,varDict[item.name].valueCount)
+          ]
+          ,varDict[item.name].delta
+        )
       )
     else if item.itemType = Op_FIT then
       begin
-      var b:real;
+      var b:ResultT;
       if not(item.name in ['+U','-U']) then 
         b:=st.Pop();
       var a:=st.Pop();
       case item.name of
-        string('+'): st.Push(a+b);
-        string('-'): st.Push(a-b);
-        string('*'): st.Push(a*b);
-        string('/'): st.Push(a/b);
-        string('^'): st.Push(power(a,b));
-        '+U': st.Push(+a);
-        '-U': st.Push(-a);
-      else exitError('unknown operator'+item.name);
+        string('+'):
+          st.Push(new ResultT(
+            a.value+b.value
+            , a.delta+b.delta
+          ));
+        string('-'):
+          st.Push(new ResultT(
+            a.value-b.value
+            , a.delta+b.delta
+          ));
+        string('*'):
+          st.Push(new ResultT(
+            a.value*b.value
+            , a.value*b.delta+b.value*a.delta
+          ));
+        string('/'):
+          st.Push(new ResultT(
+            a.value/b.value
+            , (a.value*b.delta+b.value*a.delta)/sqr(b.value)
+          ));
+        string('^'):
+          st.Push(new ResultT(
+            power(a.value,b.value)
+            , b.value*power(a.value,b.value-1)*a.delta
+          ));
+        '+U': st.Push(a);
+        '-U': st.Push(new ResultT(-a.value,-a.delta));
+      else exitError('unknown operator: "'+item.name+'"');
       end;
       end
     else if item.itemType = Func_FIT then
-      st.Push(funcDict[item.name](st.Pop()))
+      begin
+      var a:=st.Pop();
+      case item.name of
+        'sqrt':
+          st.Push(new ResultT(
+            sqrt(a.value)
+            , a.delta/(2*sqrt(a.value))
+          ));
+      else exitError('unknown function: "'+item.name+'"');
+      end;
+      end
     else exitError('unknown itemType for: '+item.name);
     if isDebug then
       writeln('DBG: calculateFormula: st:',st);
     end;
-  resValue:=st.Pop();
-  
-  if varDict.ContainsKey(formula) then
-    resDelta:=varDict[formula].delta;    
+  res:=st.Pop();
 end;
 
 // Вычисляет результат
@@ -409,12 +437,11 @@ var
 begin
   rpnFi := toRpn( parseFormula( formula));
   for var i:=1 to resultCount do
-    calculateFormula(resultList[i].resValue,resultList[i].resDelta,rpnFi,i);
+    calculateFormula(resultList[i],rpnFi,i);
 end;
 
 begin
   try
-    initialize();
     inputData();
     calculate();
     outputResult();
