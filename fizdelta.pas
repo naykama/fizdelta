@@ -2,7 +2,7 @@
 
 const
 
-  /// Признак вывода отладочных сообщений  
+  /// Признак вывода отладочных сообщений
   isDebug:boolean =
   //true;
  false;
@@ -16,21 +16,21 @@ type
     valueCount:integer:=0;
     delta:real;
   end;
-  
+
   // Результат (тип)
   ResultT = record
     value:real;
     delta:real;
-    
+
     constructor Create(value: real; delta: real);
     begin
       Self.value := value;
       Self.delta := delta;
     end;
   end;
-  
+
   /// Тип элемента формулы (тип)
-  FormulaItemTypeT = ( 
+  FormulaItemTypeT = (
     // число
     Num_FIT
     // операция
@@ -40,16 +40,16 @@ type
     // функция
     , Func_FIT
   );
-  
+
   /// Элемент формулы
   FormulaItemT = record
     itemType: FormulaItemTypeT;
     // для функции и переменных
-    name: string; 
+    name: string;
     // для чисел
     value: real;
   end;
-  
+
   /// Список элементов формулы
   FormulaItemsT = List<FormulaItemT>;
 
@@ -57,29 +57,29 @@ const
 
   /// Символы операций, используемых в формулах
   Operator_Chars: string = '+-*/^()';
- 
+
 var
 
   // Словарь переменных
   varDict := new Dictionary<string,VarT>;
-  
+
   // Формула
   formula:string;
-  
+
   // Массив и число результатов
   resultList:array [1..100] of ResultT;
   resultCount:integer:=0;
 
-  // Точность    
+  // Точность
   precision:integer:=0;
-    
+
 // Выход с сообщением об ошибке
 procedure exitError(errorText:string);
 begin
   writeln(errorText);
   halt(10);
 end;
-  
+
 procedure debug( msg: string);
 begin
   if isDebug then
@@ -135,7 +135,7 @@ begin
     on System.FormatException do
       exitError('Incorrect value of variable "'+v.name+'"');
   end;
-  if varDict.ContainsKey(v.name) then  
+  if varDict.ContainsKey(v.name) then
     exitError('Duplicate variable name "'+v.name+'" in string '+nLine)
   else
     varDict.Add( v.name, v);
@@ -151,7 +151,7 @@ begin
       maxPr:=getPrecision(w[i]);
   if precision<maxPr then
     precision:=maxPr;
-  debug('v.name: '+v.name+', delta:'+v.delta+' ;'); 
+  debug('v.name: '+v.name+', delta:'+v.delta+' ;');
 end;
 
 // Ввод исходных данных из файла
@@ -193,7 +193,7 @@ begin
   item.itemType:=itemType;
   if itemType = Num_FIT then
     item.value:=itemStr.ToReal
-  else 
+  else
     item.name:=itemStr;
   if (itemType = Op_FIT) and (item.name in [string('+'),string('-')])
       and (
@@ -209,7 +209,7 @@ begin
     exitError('Unknown function: ' + item.name);
   if (itemType = Var_FIT) and (not varDict.ContainsKey(item.name)) then
     exitError('Variable "' + item.name + '" not specified');
-    
+
   // добавление элемента
   fi.Add(item);
 end;
@@ -220,23 +220,23 @@ var
 
   // Элементы формулы
   fi := new FormulaItemsT;
-  
+
   // Позиция первого символа элемента (0 если нет элемента)
   iFirst: integer := 0;
-  
+
   // Позиция последнего символа элемента (0 если последний
   // символ не определен)
   iLast: integer := 0;
-  
+
   // Тип текущего элемента формулы
   itemType: FormulaItemTypeT;
-  
+
   // Текущий уровень вложенности скобок
   prnLevel:integer:=0;
 
 begin
   debug( 'formula: "' + s + '"');
-  
+
   // Последняя итерация цикла выполняется "за концом строки"
   for var i:=1 to s.Length + 1 do
     begin
@@ -261,7 +261,7 @@ begin
         end;
       if isCh and (iFirst = 0) then
         begin
-        // начинаем новый элемент 
+        // начинаем новый элемент
         iFirst := i;
         if isOperator then
           begin
@@ -287,7 +287,7 @@ begin
     writeln('DBG: parseFormula: result: ', fi);
 end;
 
-/// Возвращает приоритет оператора 
+/// Возвращает приоритет оператора
 function getPriority(op:string):integer;
 begin
   case op of
@@ -374,7 +374,7 @@ begin
     else if item.itemType = Op_FIT then
       begin
       var b:ResultT;
-      if not(item.name in ['+U','-U']) then 
+      if not(item.name in ['+U','-U']) then
         b:=st.Pop();
       var a:=st.Pop();
       case item.name of
@@ -431,7 +431,7 @@ end;
 procedure calculate();
 var
 
-  // Элементы формулы в обратной польской нотации  
+  // Элементы формулы в обратной польской нотации
   rpnFi: FormulaItemsT;
 
 begin
