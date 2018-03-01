@@ -1,0 +1,2 @@
+fizdelta.exe
+@pause
