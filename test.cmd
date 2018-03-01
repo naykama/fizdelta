@@ -1,3 +1,2 @@
-@rem Test\fdtest.exe 
-fdtest.exe 
+fdtest.exe
 @pause
