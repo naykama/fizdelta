@@ -4,7 +4,7 @@ const
 
   /// Признак вывода отладочных сообщений
   isDebug:boolean =
-  //true;
+ // true;
  false;
 
 type
@@ -105,13 +105,9 @@ function getPrecision(s:string):integer;
 var
   i:integer;
 begin
-    for i:=1 to length(s) do
-      if s[i]=',' then
-        begin
-        delete(s,i,1);
-        insert('.',s,i);
-        end;
-  getPrecision:=length(s)-pos('.',s);
+  s:=s.Replace(',','.');
+  i:=pos('.',s);
+  getPrecision := i = 0 ? 0 : length(s)-i;
 end;
 
 // Разбирает строку с переменной
@@ -151,7 +147,7 @@ begin
       maxPr:=getPrecision(w[i]);
   if precision<maxPr then
     precision:=maxPr;
-  debug('v.name: '+v.name+', delta:'+v.delta+' ;');
+  debug('v.name: '+v.name+', delta:'+v.delta+', precision:'+precision);
 end;
 
 // Ввод исходных данных из файла
