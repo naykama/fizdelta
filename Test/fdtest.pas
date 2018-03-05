@@ -1,9 +1,9 @@
-uses System.Diagnostics;
+﻿uses System.Diagnostics;
 
 var
   configPath: string := 'Test\autotest.cfg';
   inPath: string := 'input.txt';
-  runPath: string := 'fizdelta.exe';
+  runPath: string := 'fizdeltac.exe';
   caseCount: integer := 0;
   isDebug: boolean := 
 //    true
