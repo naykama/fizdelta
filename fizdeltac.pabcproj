@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project FileVersion="2" Name="fizdelta" MainFile="fizdelta.pas" OutputFileName="fizdelta.exe" OutputDirectory="" ProjectType="ConsoleApp" IncludeDebugInfo="True" GenerateXMLDoc="False" CommandLineArguments="--debug" AppIcon="" DeleteEXE="False" DeletePDB="True" Product="" Company="" Trademark="" Copyright="" MajorVersion="0" MinorVersion="0" BuildVersion="0" RevisionVersion="0">
+<Project FileVersion="2" Name="fizdeltac" MainFile="fizdeltac.pas" OutputFileName="fizdeltac.exe" OutputDirectory="" ProjectType="ConsoleApp" IncludeDebugInfo="True" GenerateXMLDoc="False" CommandLineArguments="--debug" AppIcon="" DeleteEXE="False" DeletePDB="True" Product="" Company="" Trademark="" Copyright="" MajorVersion="0" MinorVersion="0" BuildVersion="0" RevisionVersion="0">
   <Items>
-    <Item Type="SourceFile" Name="fizdelta.pas" Path="fizdelta.pas" />
+    <Item Type="SourceFile" Name="fizdeltac.pas" Path="fizdeltac.pas" />
     <Item Type="Reference" AssemblyName="System" FullAssemblyName="System.dll" />
   </Items>
 </Project>

@@ -1,2 +1,2 @@
-fizdelta.exe
+fizdeltac.exe
 @pause
