@@ -28,12 +28,13 @@ procedure InitializeComponent;
         self.value5 := new System.Windows.Forms.TextBox();
         self.name5 := new System.Windows.Forms.TextBox();
         self.label4 := new System.Windows.Forms.Label();
-        self.formula := new System.Windows.Forms.TextBox();
+        self.formulaBox := new System.Windows.Forms.TextBox();
         self.label5 := new System.Windows.Forms.Label();
         self.label6 := new System.Windows.Forms.Label();
         self.calcBtn := new System.Windows.Forms.Button();
         self.cleanBtn := new System.Windows.Forms.Button();
-        self.result := new System.Windows.Forms.RichTextBox();
+        self.resultBox := new System.Windows.Forms.RichTextBox();
+        self.autoTest := new System.Windows.Forms.Button();
         self.SuspendLayout();
         // 
         // name1
@@ -42,6 +43,7 @@ procedure InitializeComponent;
         self.name1.Name := 'name1';
         self.name1.Size := new System.Drawing.Size(79, 20);
         self.name1.TabIndex := 0;
+        self.name1.Text := 'a';
         // 
         // value1
         // 
@@ -49,6 +51,7 @@ procedure InitializeComponent;
         self.value1.Name := 'value1';
         self.value1.Size := new System.Drawing.Size(276, 20);
         self.value1.TabIndex := 1;
+        self.value1.Text := '10';
         self.value1.TextChanged += textBox1_TextChanged;
         // 
         // delta1
@@ -57,6 +60,7 @@ procedure InitializeComponent;
         self.delta1.Name := 'delta1';
         self.delta1.Size := new System.Drawing.Size(100, 20);
         self.delta1.TabIndex := 2;
+        self.delta1.Text := '0.1';
         // 
         // delta2
         // 
@@ -247,12 +251,14 @@ procedure InitializeComponent;
         self.label4.TextAlign := System.Drawing.ContentAlignment.MiddleCenter;
         self.label4.Click += label4_Click;
         // 
-        // formula
+        // formulaBox
         // 
-        self.formula.Location := new System.Drawing.Point(120, 278);
-        self.formula.Name := 'formula';
-        self.formula.Size := new System.Drawing.Size(276, 20);
-        self.formula.TabIndex := 29;
+        self.formulaBox.Location := new System.Drawing.Point(120, 278);
+        self.formulaBox.Name := 'formulaBox';
+        self.formulaBox.Size := new System.Drawing.Size(276, 20);
+        self.formulaBox.TabIndex := 29;
+        self.formulaBox.Text := 'a';
+        self.formulaBox.TextChanged += formula_TextChanged;
         // 
         // label5
         // 
@@ -280,6 +286,7 @@ procedure InitializeComponent;
         self.calcBtn.TabIndex := 33;
         self.calcBtn.Text := 'Вычислить';
         self.calcBtn.UseVisualStyleBackColor := true;
+        self.calcBtn.Click += calcBtn_Click;
         // 
         // cleanBtn
         // 
@@ -289,24 +296,36 @@ procedure InitializeComponent;
         self.cleanBtn.TabIndex := 34;
         self.cleanBtn.Text := 'Очистить';
         self.cleanBtn.UseVisualStyleBackColor := true;
+        self.cleanBtn.Click += cleanBtn_Click;
         // 
-        // result
+        // resultBox
         // 
-        self.result.Location := new System.Drawing.Point(120, 312);
-        self.result.Name := 'result';
-        self.result.Size := new System.Drawing.Size(276, 123);
-        self.result.TabIndex := 35;
-        self.result.Text := '';
+        self.resultBox.Location := new System.Drawing.Point(120, 312);
+        self.resultBox.Name := 'resultBox';
+        self.resultBox.Size := new System.Drawing.Size(276, 123);
+        self.resultBox.TabIndex := 35;
+        self.resultBox.Text := '';
+        // 
+        // autoTest
+        // 
+        self.autoTest.Location := new System.Drawing.Point(402, 353);
+        self.autoTest.Name := 'autoTest';
+        self.autoTest.Size := new System.Drawing.Size(100, 26);
+        self.autoTest.TabIndex := 36;
+        self.autoTest.Text := 'autoTest';
+        self.autoTest.UseVisualStyleBackColor := true;
+        self.autoTest.Click += autoTest_Click;
         // 
         // MForm
         // 
         self.ClientSize := new System.Drawing.Size(541, 467);
-        self.Controls.Add(self.result);
+        self.Controls.Add(self.autoTest);
+        self.Controls.Add(self.resultBox);
         self.Controls.Add(self.cleanBtn);
         self.Controls.Add(self.calcBtn);
         self.Controls.Add(self.label6);
         self.Controls.Add(self.label5);
-        self.Controls.Add(self.formula);
+        self.Controls.Add(self.formulaBox);
         self.Controls.Add(self.label4);
         self.Controls.Add(self.delta8);
         self.Controls.Add(self.value8);

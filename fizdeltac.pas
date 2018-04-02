@@ -76,7 +76,13 @@ begin
     inputData();
     calculate();
     outputResult();
-  except on e: Exception do
+  except
+    on e: CalcDeltaException do
+    begin
+      System.Console.Error.WriteLine(e.Message);
+      halt(13);
+    end;
+    on e: Exception do
     begin
       System.Console.Error.WriteLine( e.ToString());
       halt(13);

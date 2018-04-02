@@ -13,7 +13,7 @@ var
     true
 //    false
   ;
-  failcount:integer:=0;
+  failCount:integer:=0;
   
   type StringArrayT = array [1..100] of String;
 
@@ -134,14 +134,14 @@ var
           end;
     if isResultDiff or isTextDiff then
       begin
-      failcount+=1;
+      failCount+=1;
       writeln('*** CASE ',caseCount,': ',caseName,' (line ',caseLine,')');
       end;
-   if isResultDiff then
+    if isResultDiff then
       begin
       writeln('Unexpected result:');
       if exitCode=0 then
-        writeln('SUCCESS instead of ERROR ')
+        writeln('SUCCESS instead of ERROR')
       else
         writeln('ERROR instead of SUCCESS')
       end;
@@ -212,6 +212,6 @@ end;
  
 begin
   processConfig();
-  writeln('OK ( case checked: ',caseCount,')',' failed:' ,failcount);
+  writeln('OK ( case checked: ',caseCount,', failed:' ,failCount,')');
 
 end.

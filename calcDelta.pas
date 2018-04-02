@@ -6,10 +6,13 @@ uses System.Collections.Generic;
 const
   /// Признак вывода отладочных сообщений
   isDebug:boolean =
-//   true;
-  false;  
+ //true;
+ false;  
  
 type
+  
+  // Исключения при вычислении
+  CalcDeltaException = class(Exception) end;
 
   // Переменная (тип)
   VarT = record
@@ -33,7 +36,6 @@ type
   
 
 var
-
   // Словарь переменных
   varDict := new Dictionary<string,VarT>;
 
@@ -103,8 +105,7 @@ end;
 // Выход с сообщением об ошибке
 procedure exitError(errorText:string);
 begin
-  writeln(errorText);
-  halt(10);
+  raise new CalcDeltaException(errorText);
 end;
 
 // Перевод строки в число
@@ -294,7 +295,7 @@ begin
     outItems+=st.Pop();
   toRpn := outItems;
   if isDebug then
-    writeln('DBG: toPrn: result: ', outItems);
+    writeln('DBG: toRpn: result: ', outItems);
 end;
 
 // Возвращает результат i-того вычисления формулы
