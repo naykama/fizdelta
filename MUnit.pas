@@ -145,7 +145,6 @@ procedure MForm.addVar(name,value,delta:string);
 var
   v: VarT;
   i:integer;
-  s:string;
 begin
   v.name:=name; 
   var w:=value.ToWords(';');
@@ -155,6 +154,8 @@ begin
   if resultCount<v.valueCount then
     resultCount:=v.valueCount;
   v.delta:=toReal(delta);
+  if varDict.ContainsKey(v.name) then
+    exitError('Duplicate variable name "'+v.name+'"');
   varDict.Add(v.name,v);
 end;
 
@@ -188,6 +189,7 @@ begin
   if name8.Text<>'' then
     addVar(name8.Text,value8.Text,delta8.Text);
   calculate();
+  resultBox.Clear;
   for i:=1 to resultCount do
     begin
     r:=resultList[i].value;
@@ -260,7 +262,7 @@ var
   isResultDiff:boolean;
   isTextDiff:boolean;
 begin
-//  if (failCount > 0) then exit;
+  if (failCount > 0) then exit;
   caseCount += 1;
   formulaBox.Text := formulaText;
   name1.Text := vName1; value1.Text := vValue1; delta1.Text := vDelta1;
@@ -314,8 +316,8 @@ begin
     caseCount, failCount, failText
     , 'Duplicate variable name'
     , false
-    , 'Duplicate variable name "b" in string 3'
-    , ''
+    , 'Duplicate variable name "b"'
+    , 'a+b'
     , 'a', '0.21', '0.014'
     , 'b', '0.15', '0.123'
     , 'b', '0.67', '0.125'
