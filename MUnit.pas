@@ -149,18 +149,13 @@ var
 begin
   v.name:=name; 
   var w:=value.ToWords(';');
-  for i:= 0 to w.Length-1 do
-    writeln('w:',w[i]);
   v.valueCount:=w.Length;
-  writeln('v.valueCount=',v.valueCount);
   for i:=1 to v.valueCount do
     v.valueList[i]:=toReal(w[i-1]);
- 
   if resultCount<v.valueCount then
     resultCount:=v.valueCount;
-  v.delta:=delta.ToReal;
+  v.delta:=toReal(delta);
   varDict.Add(v.name,v);
-
 end;
 
 procedure MForm.calcBtn_Click(sender: Object; e: EventArgs);
@@ -169,52 +164,36 @@ var
   a,da,r,dr:real;
   v: VarT;
   s:string;
-  
+  i:integer;
   resArr: array of ResultT;
 begin
   try
-{  varDict.Clear;
-  formula:=formulaBox.Text;
-  addVar(name1.Text,value1.Text,delta1.Text);
-  addVar(name2.Text,value2.Text,delta2.Text);
-  addVar(name3.Text,value3.Text,delta3.Text);
-  addVar(name4.Text,value4.Text,delta4.Text);
-  addVar(name5.Text,value5.Text,delta5.Text);
-  addVar(name6.Text,value6.Text,delta6.Text);
-  addVar(name7.Text,value7.Text,delta7.Text);
-  addVar(name8.Text,value8.Text,delta8.Text);}
-
- { v.name:=name1.Text;
-  v.valueCount:=1;
-  v.valueList[1]:=value1.Text.ToReal;
-  v.delta:=delta1.Text.ToReal;
-  varDict.Add(v.name,v);
-  resultCount:=1;
-  
-  calculate();
-    str(resultList[1].value,r);
-    str(resultList[1].delta,dr);
-    resultBox.AppendText(r+' '+dr);}
-// readln(formula);
-//  readln(a,da);
   varDict.Clear;
   formula:=formulaBox.Text;
   if formula='' then
     exitError('Formula not specified');
-  a:=value1.Text.ToReal;  
-  da:=delta1.Text.ToReal;
-  v.name:=name1.Text;
-  v.valueCount:=1;
-  v.valueList[1]:=a;
-  v.delta:=da;
-  varDict.Add(v.name,v);
-  resultCount:=1;
+  addVar(name1.Text,value1.Text,delta1.Text);
+  if name2.Text<>'' then
+    addVar(name2.Text,value2.Text,delta2.Text);
+  if name3.Text<>'' then
+    addVar(name3.Text,value3.Text,delta3.Text);
+  if name4.Text<>'' then
+    addVar(name4.Text,value4.Text,delta4.Text);
+  if name5.Text<>'' then
+    addVar(name5.Text,value5.Text,delta5.Text);
+  if name6.Text<>'' then
+    addVar(name6.Text,value6.Text,delta6.Text);
+  if name7.Text<>'' then
+    addVar(name7.Text,value7.Text,delta7.Text);
+  if name8.Text<>'' then
+    addVar(name8.Text,value8.Text,delta8.Text);
   calculate();
-  r:=resultList[1].value;
-  dr:=resultList[1].delta;
-  resultBox.Text := r.ToString()+' '+dr.ToString();
-
-//}
+  for i:=1 to resultCount do
+    begin
+    r:=resultList[i].value;
+    dr:=resultList[i].delta;
+    resultBox.AppendText(r+'+-'+dr+';'+EOL);
+    end;
 
   except
     on ex: CalcDeltaException do
