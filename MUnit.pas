@@ -199,6 +199,8 @@ begin
 //  readln(a,da);
   varDict.Clear;
   formula:=formulaBox.Text;
+  if formula='' then
+    exitError('Formula not specified');
   a:=value1.Text.ToReal;  
   da:=delta1.Text.ToReal;
   v.name:=name1.Text;
@@ -293,7 +295,7 @@ begin
   calcBtn_Click( nil, nil);
   isOk := not resultBox.Text.StartsWith( Error_Prefix);
   isResultDiff:= isOkResult <> isOk;
-  isTextDiff := outStr <> resultBox.Text;
+  isTextDiff := 'Error: '+outStr <> resultBox.Text;
   if isResultDiff or isTextDiff then
     begin
     failCount+=1;
@@ -339,7 +341,142 @@ begin
     , 'b', '0.15', '0.123'
     , 'b', '0.67', '0.125'
   );
-  
+  checkCase(
+    caseCount, failCount, failText
+    , 'Invalid number of variable values'
+    , false
+    , 'Inconsistent number of variable values (variables "s" and "u")'
+    , 'u'
+    , 'u', '0.22;0.43', '0.0194'
+    , 'g', '10', '0'
+    , 's', '0.045;0.065;0.107;0.110', '0.001'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Incorrect value of variable'
+    , false
+    , 'Incorrect value of variable "b"'
+    , 'b'
+    , 'a', '0.211', '0.014'
+    , 'b', '0.15y', '0.123'
+    , 'c', '0.671', '0.125'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Unknown variable'
+    , false
+    , 'Variable "b" not specified'
+    , 'b+a'
+    , 'a', '3.0', '0.0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Unknown function'
+    , false
+    , 'Unknown function: ggh'
+    , 'ggh(a)'
+    , 'a', '3.0', '0.0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Unbalanced parenthesis'
+    , false
+    , 'Number of opening parenthesis is not equal to number of closing parenthesis'
+    , '(a+1))'
+    , 'a', '3.0', '0.0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Trivial formula'
+    , true
+    , '0.151+-0.123'
+    , 'b'
+    , 'a', '0.211', '0.014'
+    , 'b', '0.151', '0.123'
+    , 'c', '0.671', '0.125'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Comma as decimal separator'
+    , true
+    , '0.151+-0.123'
+    , 'b'
+    , 'a', '0,211', '0,014'
+    , 'b', '0.151', '0,123'
+    , 'c', '0.671', '0.125'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Arithmetic formula'
+    , true
+    , '3.5+-0.0'
+    , '3 + 4 * 2 / (1 - 5)^2'
+    , 'a', '0.1', '0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Formula with power'
+    , true
+    , '256.0+-0.0'
+    , '2^2^3'
+    , 'a', '0.1', '0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Formula with root'
+    , true
+    , '3.0+-0.0'
+    , 'sqrt(a+b)'
+    , 'a', '3.0', '0'
+    , 'b', '6.0', '0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Unary operations'
+    , true
+    , '-2+-0'
+    , '-1*(-4+6)'
+    , 'a', '3', '0'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Root of the product'
+    , true
+    , '0.4450+-0.0246;0.5348+-0.0277;0.6861+-0.0335;0.6957+-0.0338'
+    , 'sqrt(2*u*g*s)'
+    , 'u', '0.22', '0.0194'
+    , 'g', '10', '0'
+    , 's', '0.045;0.065;0.107;0.110', '0.001'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Square division'
+    , true
+    , '0.530+-0.266'
+    , '2*s/t^2'
+    , 's', '1.060', '0.001'
+    , 't', '2', '0.5'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Precision 1'
+    , true
+    , '0.150+-0.123'
+    , 'b'
+    , 'a', '0.211', '0.014'
+    , 'b', '0.15', '0.123'
+    , 'c', '0.671', '0.125'
+  );
+  checkCase(
+    caseCount, failCount, failText
+    , 'Precision 2'
+    , true
+    , '322.7+-1.5'
+    , 'p/T'
+    , 'p', '98736', '136.0'
+    , 'T', '306', '1'
+  );
+ 
   
   resultBox.Text :=
     ( failCount > 0 ? 'FAILED' : 'OK') 
