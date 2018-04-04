@@ -17,7 +17,7 @@ type
     procedure MForm_Load(sender: Object; e: EventArgs);
     procedure calcBtn_Click(sender: Object; e: EventArgs);
     procedure formula_TextChanged(sender: Object; e: EventArgs);
-    procedure addVar(name,value,delta:string);
+    procedure addVar(var resultCountName:string;name,value,delta:string);
     procedure cleanBtn_Click(sender: Object; e: EventArgs);
     procedure autoTest_Click(sender: Object; e: EventArgs);
 procedure checkCase(
@@ -141,7 +141,7 @@ begin
 end;
 
 /// добавляет переменные в словарь для расчёта формулы
-procedure MForm.addVar(name,value,delta:string);
+procedure MForm.addVar(var resultCountName:string;name,value,delta:string);
 var
   v: VarT;
   i:integer;
@@ -151,8 +151,14 @@ begin
   v.valueCount:=w.Length;
   for i:=1 to v.valueCount do
     v.valueList[i]:=toReal(w[i-1]);
-  if resultCount<v.valueCount then
-    resultCount:=v.valueCount;
+  if (v.valueCount>1)and(resultCount>1)and(resultCount<>v.valueCount) then
+    exitError('Inconsistent number of variable values (variables "'+v.name+'" and "'+resultCountName+'")')
+  else
+    if resultCount<v.valueCount then
+      begin
+      resultCount:=v.valueCount;
+      resultCountName:=v.name;
+      end;
   v.delta:=toReal(delta);
   if varDict.ContainsKey(v.name) then
     exitError('Duplicate variable name "'+v.name+'"');
@@ -167,27 +173,28 @@ var
   s:string;
   i:integer;
   resArr: array of ResultT;
+  resultCountName:string;
 begin
   try
   varDict.Clear;
   formula:=formulaBox.Text;
   if formula='' then
     exitError('Formula not specified');
-  addVar(name1.Text,value1.Text,delta1.Text);
+  addVar(resultCountName,name1.Text,value1.Text,delta1.Text);
   if name2.Text<>'' then
-    addVar(name2.Text,value2.Text,delta2.Text);
+    addVar(resultCountName,name2.Text,value2.Text,delta2.Text);
   if name3.Text<>'' then
-    addVar(name3.Text,value3.Text,delta3.Text);
+    addVar(resultCountName,name3.Text,value3.Text,delta3.Text);
   if name4.Text<>'' then
-    addVar(name4.Text,value4.Text,delta4.Text);
+    addVar(resultCountName,name4.Text,value4.Text,delta4.Text);
   if name5.Text<>'' then
-    addVar(name5.Text,value5.Text,delta5.Text);
+    addVar(resultCountName,name5.Text,value5.Text,delta5.Text);
   if name6.Text<>'' then
-    addVar(name6.Text,value6.Text,delta6.Text);
+    addVar(resultCountName,name6.Text,value6.Text,delta6.Text);
   if name7.Text<>'' then
-    addVar(name7.Text,value7.Text,delta7.Text);
+    addVar(resultCountName,name7.Text,value7.Text,delta7.Text);
   if name8.Text<>'' then
-    addVar(name8.Text,value8.Text,delta8.Text);
+    addVar(resultCountName,name8.Text,value8.Text,delta8.Text);
   calculate();
   resultBox.Clear;
   for i:=1 to resultCount do
