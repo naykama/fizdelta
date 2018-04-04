@@ -149,8 +149,17 @@ begin
   v.name:=name; 
   var w:=value.ToWords(';');
   v.valueCount:=w.Length;
-  for i:=1 to v.valueCount do
-    v.valueList[i]:=toReal(w[i-1]);
+  try
+    for i:=1 to v.valueCount do
+      v.valueList[i]:=toReal(w[i-1]);
+    v.delta:=toReal(delta);
+  except
+    on System.FormatException do
+      exitError('Incorrect value of variable "'+v.name+'"');
+  end;
+  for i:=0 to w.Length-1 do
+    if precision<getPrecision(w[i])then
+      precision:=getPrecision(w[i]);  
   if (v.valueCount>1)and(resultCount>1)and(resultCount<>v.valueCount) then
     exitError('Inconsistent number of variable values (variables "'+v.name+'" and "'+resultCountName+'")')
   else
@@ -159,7 +168,6 @@ begin
       resultCount:=v.valueCount;
       resultCountName:=v.name;
       end;
-  v.delta:=toReal(delta);
   if varDict.ContainsKey(v.name) then
     exitError('Duplicate variable name "'+v.name+'"');
   varDict.Add(v.name,v);
@@ -177,6 +185,8 @@ var
 begin
   try
   varDict.Clear;
+  resultCount:=0;
+  precision:=0;
   formula:=formulaBox.Text;
   if formula='' then
     exitError('Formula not specified');
@@ -201,7 +211,12 @@ begin
     begin
     r:=resultList[i].value;
     dr:=resultList[i].delta;
-    resultBox.AppendText(r+'+-'+dr+';'+EOL);
+    resultBox.AppendText(
+      (i>1? EOL :'')
+      + (r.ToString( 'N' + precision.ToString)).Replace(',','.')
+      + '+-'
+      + (dr.ToString( 'N' + precision.ToString)).Replace(',','.')
+    );
     end;
 
   except
@@ -283,7 +298,7 @@ begin
   calcBtn_Click( nil, nil);
   isOk := not resultBox.Text.StartsWith( Error_Prefix);
   isResultDiff:= isOkResult <> isOk;
-  isTextDiff := 'Error: '+outStr <> resultBox.Text;
+  isTextDiff := ( not isOk ? Error_Prefix : '') +outStr <> resultBox.Text;
   if isResultDiff or isTextDiff then
     begin
     failCount+=1;
