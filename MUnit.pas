@@ -159,7 +159,9 @@ begin
   end;
   for i:=0 to w.Length-1 do
     if precision<getPrecision(w[i])then
-      precision:=getPrecision(w[i]);  
+      precision:=getPrecision(w[i]); 
+    if precision<getPrecision(delta) then
+      precision:=getPrecision(delta);
   if (v.valueCount>1)and(resultCount>1)and(resultCount<>v.valueCount) then
     exitError('Inconsistent number of variable values (variables "'+v.name+'" and "'+resultCountName+'")')
   else
@@ -298,7 +300,9 @@ begin
   calcBtn_Click( nil, nil);
   isOk := not resultBox.Text.StartsWith( Error_Prefix);
   isResultDiff:= isOkResult <> isOk;
-  isTextDiff := ( not isOk ? Error_Prefix : '') +outStr <> resultBox.Text;
+  var factualText := resultBox.Text;
+  var expectedText := ( not isOk ? Error_Prefix : '') + outStr.Replace( chr(13), '');
+  isTextDiff := expectedText <> factualText;
   if isResultDiff or isTextDiff then
     begin
     failCount+=1;
@@ -309,13 +313,19 @@ begin
       'Unexpected result:' + EOL
       + ( isOk ? 'SUCCESS instead of ERROR' : 'ERROR instead of SUCCESS') + EOL
     ;
+  var fb := Encoding.Default.GetBytes( factualText);
+  var fHex := BitConverter.ToString(fb);    
+  var eb := Encoding.Default.GetBytes( expectedText);
+  var eHex := BitConverter.ToString(eb);    
   if isTextDiff then
     failText +=
       'Unexpected output:' + EOL
-      + EOL + 'factual:' + EOL
-      + resultBox.Text + EOL
-      + EOL + 'expected:' + EOL
-      + outStr + EOL
+      + EOL + 'factual (len=' + factualText + '):' + EOL
+      + factualText + EOL
+      + 'xx:' + fHex + EOL
+      + EOL + 'expected (len=' + expectedText.Length + '):' + EOL
+      + expectedText + EOL
+      + 'xx:' + eHex + EOL
     ;
 end;
 
@@ -445,7 +455,7 @@ begin
     caseCount, failCount, failText
     , 'Root of the product'
     , true
-    , '0.4450+-0.0246;0.5348+-0.0277;0.6861+-0.0335;0.6957+-0.0338'
+    , '0.4450+-0.0246'+EOL+'0.5348+-0.0277'+EOL+'0.6861+-0.0335'+EOL+'0.6957+-0.0338'
     , 'sqrt(2*u*g*s)'
     , 'u', '0.22', '0.0194'
     , 'g', '10', '0'
