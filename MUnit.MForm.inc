@@ -314,6 +314,7 @@ procedure InitializeComponent;
         // 
         // MForm
         // 
+        self.AcceptButton := self.calcBtn;
         self.ClientSize := new System.Drawing.Size(541, 467);
         self.Controls.Add(self.autoTest);
         self.Controls.Add(self.resultBox);
