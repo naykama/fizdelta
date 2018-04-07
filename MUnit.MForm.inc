@@ -43,7 +43,6 @@ procedure InitializeComponent;
         self.name1.Name := 'name1';
         self.name1.Size := new System.Drawing.Size(79, 20);
         self.name1.TabIndex := 0;
-        self.name1.Text := 'a';
         // 
         // value1
         // 
@@ -51,7 +50,6 @@ procedure InitializeComponent;
         self.value1.Name := 'value1';
         self.value1.Size := new System.Drawing.Size(276, 20);
         self.value1.TabIndex := 1;
-        self.value1.Text := '10';
         self.value1.TextChanged += textBox1_TextChanged;
         // 
         // delta1
@@ -60,7 +58,6 @@ procedure InitializeComponent;
         self.delta1.Name := 'delta1';
         self.delta1.Size := new System.Drawing.Size(100, 20);
         self.delta1.TabIndex := 2;
-        self.delta1.Text := '0.1';
         // 
         // delta2
         // 
@@ -257,7 +254,6 @@ procedure InitializeComponent;
         self.formulaBox.Name := 'formulaBox';
         self.formulaBox.Size := new System.Drawing.Size(276, 20);
         self.formulaBox.TabIndex := 29;
-        self.formulaBox.Text := 'a';
         self.formulaBox.TextChanged += formula_TextChanged;
         // 
         // label5
