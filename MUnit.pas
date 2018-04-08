@@ -400,6 +400,14 @@ begin
   );
   checkCase(
     caseCount, failCount, failText
+    , 'Unexpected completion of formula'
+    , false
+    , 'Unexpected completion of formula'
+    , '(a+1)*'
+    , 'a', '3.0', '0.0'
+  );
+  checkCase(
+    caseCount, failCount, failText
     , 'Trivial formula'
     , true
     , '0.151+-0.123'

@@ -306,6 +306,7 @@ procedure calculateFormula(
 );
 var
   st := new Stack<ResultT>;
+  a: ResultT;
 begin
   foreach var item in rpnFi do
     begin
@@ -328,7 +329,10 @@ begin
       var b:ResultT;
       if not(item.name in ['+U','-U']) then
         b:=st.Pop();
-      var a:=st.Pop();
+      if st.Count>0 then
+        a:=st.Pop()
+      else
+        ExitError('Unexpected completion of formula');
       case item.name of
         string('+'):
           st.Push(new ResultT(
@@ -362,7 +366,7 @@ begin
       end
     else if item.itemType = Func_FIT then
       begin
-      var a:=st.Pop();
+        a:=st.Pop();
       case item.name of
         'sqrt':
           st.Push(new ResultT(
