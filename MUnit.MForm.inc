@@ -1,4 +1,4 @@
-procedure InitializeComponent;
+﻿procedure InitializeComponent;
     begin
         self.name1 := new System.Windows.Forms.TextBox();
         self.value1 := new System.Windows.Forms.TextBox();
@@ -310,6 +310,7 @@ procedure InitializeComponent;
         self.autoTest.TabIndex := 36;
         self.autoTest.Text := 'autoTest';
         self.autoTest.UseVisualStyleBackColor := true;
+        self.autoTest.Visible := false;
         self.autoTest.Click += autoTest_Click;
         // 
         // MForm

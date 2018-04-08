@@ -37,6 +37,7 @@ procedure checkCase(
   vName7: string:= ''; vValue7: string:= ''; vDelta7: string:= '';
   vName8: string:= ''; vValue8: string:= ''; vDelta8: string:= '' 
 );
+    procedure autoTest_Leave(sender: Object; e: EventArgs);
   {$region FormDesigner}
   private
     {$resource MUnit.MForm.resources}
@@ -177,12 +178,8 @@ end;
 
 procedure MForm.calcBtn_Click(sender: Object; e: EventArgs);
 var
-
-  a,da,r,dr:real;
-  v: VarT;
-  s:string;
+  r,dr:real;
   i:integer;
-  resArr: array of ResultT;
   resultCountName:string;
 begin
   try
@@ -505,5 +502,11 @@ begin
     + EOL + failText
   ;
 end;
+
+procedure MForm.autoTest_Leave(sender: Object; e: EventArgs);
+begin
+  
+end;
+
 
 end.
